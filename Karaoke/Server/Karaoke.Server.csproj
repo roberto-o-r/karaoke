@@ -2,9 +2,12 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UserSecretsId>71890531-6551-444e-8eb8-b9ff65d7b306</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/0a8b7b11-1bc2-41c7-9065-f591cc7336c1/resourceGroups/KaraokeResourceGroup/providers/microsoft.insights/components/KaraokeApplicationInsights</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.13.1" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="3.2.0" />
   </ItemGroup>
 
