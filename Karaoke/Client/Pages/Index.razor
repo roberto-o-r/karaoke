@@ -1,0 +1,65 @@
+﻿@page "/"
+@using Karaoke.Shared
+@inject HttpClient Http
+
+<h1>Karaoke entre Amigos</h1>
+
+<div class="form-group">
+    <label for="searchInput">¿Cuál vas a cantar?</label>
+    <input type="text" class="form-control" id="searchInput" aria-describedby="help" @oninput="searchChanged">
+    <small id="help" class="form-text text-muted">Busca por artista o por canción.</small>
+</div>
+
+@if (songs == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <p>Total: @filteredSongs.Count()</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Intérprete</th>
+                <th>Canción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var song in filteredSongs)
+            {
+                <tr>
+                    <td>@song.Artist</td>
+                    <td>@song.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Song> songs;
+    private List<Song> filteredSongs;
+
+    protected override async Task OnInitializedAsync()
+    {
+        songs = await Http.GetFromJsonAsync<List<Song>>("Songs");
+        filteredSongs = songs;
+    }
+
+    private void searchChanged(ChangeEventArgs e)
+    {
+        searchSongs(e.Value.ToString().ToLower());
+    }
+
+    private void searchSongs(string searchText = null)
+    {
+        if (!string.IsNullOrEmpty(searchText))
+        {
+            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText) || s.Name.ToLower().Contains(searchText)).ToList();
+        }
+        else
+        {
+            filteredSongs = songs;
+        }
+    }
+}
