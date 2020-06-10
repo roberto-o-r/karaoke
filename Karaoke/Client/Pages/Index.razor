@@ -50,7 +50,7 @@ else
         songs = await Http.GetFromJsonAsync<List<Song>>("Songs");
         filteredSongs = songs;
 
-        debounceTimer = new System.Timers.Timer(800);
+        debounceTimer = new System.Timers.Timer(500);
         debounceTimer.Elapsed += OnUserFinish;
         debounceTimer.AutoReset = false;
     }
