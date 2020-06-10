@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using Karaoke.Shared
+@using System.Globalization
 @inject HttpClient Http
 
 <h1>Karaoke entre Amigos</h1>
@@ -53,13 +54,12 @@ else
 
     private void searchSongs(string searchText = null)
     {
+        filteredSongs = songs;
         if (!string.IsNullOrEmpty(searchText))
         {
-            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText) || s.Name.ToLower().Contains(searchText)).ToList();
-        }
-        else
-        {
-            filteredSongs = songs;
+            var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+            filteredSongs = filteredSongs.Where(s => compareInfo.IndexOf(s.Artist, searchText, CompareOptions.IgnoreNonSpace) > -1 ||
+                compareInfo.IndexOf(s.Name, searchText, CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
     }
 }
