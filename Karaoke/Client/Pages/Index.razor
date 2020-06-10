@@ -1,7 +1,9 @@
 ﻿@page "/"
-@using Karaoke.Shared
-@using System.Globalization
 @inject HttpClient Http
+
+@using System.Globalization
+@using System.Timers;
+@using Karaoke.Shared
 
 <h1>Karaoke entre Amigos</h1>
 
@@ -38,28 +40,46 @@ else
 }
 
 @code {
+    private Timer debounceTimer;
     private List<Song> songs;
     private List<Song> filteredSongs;
+    private string searchText;
 
     protected override async Task OnInitializedAsync()
     {
         songs = await Http.GetFromJsonAsync<List<Song>>("Songs");
         filteredSongs = songs;
+
+        debounceTimer = new System.Timers.Timer(800);
+        debounceTimer.Elapsed += OnUserFinish;
+        debounceTimer.AutoReset = false;
     }
 
     private void searchChanged(ChangeEventArgs e)
     {
-        searchSongs(e.Value.ToString().ToLower());
+        debounceTimer.Stop();
+        debounceTimer.Start();
+
+        searchText = e.Value.ToString().ToLower();
     }
 
-    private void searchSongs(string searchText = null)
+    private void OnUserFinish(Object source, ElapsedEventArgs e)
+    {
+        InvokeAsync(() => { searchSongs(); });
+    }
+
+    private void searchSongs()
     {
         filteredSongs = songs;
-        if (!string.IsNullOrEmpty(searchText))
+        var currentSearch = searchText.ToLower();
+
+        if (!string.IsNullOrEmpty(currentSearch))
         {
             var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
-            filteredSongs = filteredSongs.Where(s => compareInfo.IndexOf(s.Artist, searchText, CompareOptions.IgnoreNonSpace) > -1 ||
-                compareInfo.IndexOf(s.Name, searchText, CompareOptions.IgnoreNonSpace) > -1).ToList();
+            filteredSongs = filteredSongs.Where(s => compareInfo.IndexOf(s.Artist, currentSearch, CompareOptions.IgnoreNonSpace) > -1 ||
+                compareInfo.IndexOf(s.Name, currentSearch, CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
+
+        base.StateHasChanged();
     }
 }
