@@ -60,7 +60,7 @@ else
         debounceTimer.Stop();
         debounceTimer.Start();
 
-        searchText = e.Value.ToString().ToLower();
+        searchText = e.Value.ToString();
     }
 
     private void OnUserFinish(Object source, ElapsedEventArgs e)
@@ -76,8 +76,8 @@ else
         if (!string.IsNullOrEmpty(currentSearch))
         {
             var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
-            filteredSongs = filteredSongs.Where(s => compareInfo.IndexOf(s.Artist, currentSearch, CompareOptions.IgnoreNonSpace) > -1 ||
-                compareInfo.IndexOf(s.Name, currentSearch, CompareOptions.IgnoreNonSpace) > -1).ToList();
+            filteredSongs = filteredSongs.Where(s => compareInfo.IndexOf(s.Artist.ToLower(), currentSearch, CompareOptions.IgnoreNonSpace) > -1 ||
+                compareInfo.IndexOf(s.Name.ToLower(), currentSearch, CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
 
         base.StateHasChanged();
