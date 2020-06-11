@@ -9,7 +9,7 @@
 
 <div class="form-group">
     <label for="searchInput">¿Cuál vas a cantar?</label>
-    <input type="text" class="form-control" id="searchInput" aria-describedby="help" @oninput="searchChanged">
+    <input type="text" class="form-control" id="searchInput" aria-describedby="help" @oninput="SearchChanged">
     <small id="help" class="form-text text-muted">Busca por artista o por canción.</small>
 </div>
 
@@ -55,7 +55,7 @@ else
         debounceTimer.AutoReset = false;
     }
 
-    private void searchChanged(ChangeEventArgs e)
+    private void SearchChanged(ChangeEventArgs e)
     {
         debounceTimer.Stop();
         debounceTimer.Start();
@@ -65,13 +65,13 @@ else
 
     private void OnUserFinish(Object source, ElapsedEventArgs e)
     {
-        InvokeAsync(() => { searchSongs(); });
+        InvokeAsync(() => { SearchSongs(); });
     }
 
-    private void searchSongs()
+    private void SearchSongs()
     {
         filteredSongs = songs;
-        var currentSearch = searchText.ToLower();
+        var currentSearch = searchText.ToLower().Trim();
 
         if (!string.IsNullOrEmpty(currentSearch))
         {

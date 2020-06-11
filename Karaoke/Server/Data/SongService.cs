@@ -22,10 +22,17 @@ namespace Karaoke.Server.Data
 
         public void LoadSongs()
         {
-            using (StreamReader r = new StreamReader(env.ContentRootPath + "/data/canciones.json", Encoding.UTF8))
+            try
             {
-                string json = r.ReadToEnd();
-                songs = JsonConvert.DeserializeObject<List<Song>>(json);
+                using (StreamReader r = new StreamReader(env.ContentRootPath + "/data/canciones.json", Encoding.UTF8))
+                {
+                    string json = r.ReadToEnd();
+                    songs = JsonConvert.DeserializeObject<List<Song>>(json);
+                }
+            }
+            catch (Exception)
+            {
+                songs = new List<Song>();
             }
         }
 
