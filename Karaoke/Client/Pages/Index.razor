@@ -76,8 +76,6 @@ else
     private async void OnFavorite(Song song)
     {
         song.Favorite = !song.Favorite;
-        songs.Find(s => s.Artist == song.Artist && s.Name == song.Name).Favorite = song.Favorite;
-        filteredSongs.Find(s => s.Artist == song.Artist && s.Name == song.Name).Favorite = song.Favorite;
 
         if (song.Favorite)
         {

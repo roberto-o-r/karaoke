@@ -185,3 +185,7 @@ app {
 .fav {
     cursor: pointer;
 }
+
+th, td {
+    word-break: break-word;
+}

@@ -1,26 +1,28 @@
 ﻿@using Karaoke.Shared
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>Intérprete</th>
-            <th>Canción</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var song in Songs)
-        {
+<div>
+    <table class="table" style="table-layout:fixed;">
+        <thead>
             <tr>
-                <td>@song.Artist</td>
-                <td>@song.Name</td>
-                <td style="width:16px">
-                    <i class="fav material-icons md-18" @onclick="@(() => OnFavorite.InvokeAsync(song))">@(song.Favorite? "favorite": "favorite_border")</i>
-                </td>
+                <th>Intérprete</th>
+                <th>Canción</th>
+                <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var song in Songs)
+            {
+                <tr>
+                    <td>@song.Artist</td>
+                    <td>@song.Name</td>
+                    <td style="width:24px; padding-left:0px; padding-right:0px;">
+                        <i class="fav material-icons md-18" @onclick="@(() => OnFavorite.InvokeAsync(song))">@(song.Favorite? "favorite": "favorite_border")</i>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @code {
     [Parameter]
