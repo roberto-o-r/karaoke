@@ -1,6 +1,6 @@
 ﻿@page "/"
+@inject Karaoke.Client.Local.FavoriteService FavoriteService
 @inject HttpClient Http
-
 @using System.Globalization
 @using System.Timers;
 @using Karaoke.Shared
@@ -20,34 +20,24 @@
 else
 {
     <p>Total: @filteredSongs.Count()</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Intérprete</th>
-                <th>Canción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var song in filteredSongs)
-            {
-                <tr>
-                    <td>@song.Artist</td>
-                    <td>@song.Name</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <Table Songs="filteredSongs" OnFavorite="OnFavorite"></Table>
 }
 
 @code {
     private Timer debounceTimer;
     private List<Song> songs;
     private List<Song> filteredSongs;
+    private List<Song> favorites;
     private string searchText;
 
     protected override async Task OnInitializedAsync()
     {
         songs = await Http.GetFromJsonAsync<List<Song>>("Songs");
+        favorites = await FavoriteService.GetFavorites();
+        foreach (var favorite in favorites)
+        {
+            songs.First(s => s.Artist == favorite.Artist && s.Name == favorite.Name).Favorite = true;
+        }
         filteredSongs = songs;
 
         debounceTimer = new System.Timers.Timer(500);
@@ -81,5 +71,21 @@ else
         }
 
         base.StateHasChanged();
+    }
+
+    private async void OnFavorite(Song song)
+    {
+        song.Favorite = !song.Favorite;
+        songs.Find(s => s.Artist == song.Artist && s.Name == song.Name).Favorite = song.Favorite;
+        filteredSongs.Find(s => s.Artist == song.Artist && s.Name == song.Name).Favorite = song.Favorite;
+
+        if (song.Favorite)
+        {
+            await FavoriteService.AddFavorite(song);
+        }
+        else
+        {
+            await FavoriteService.RemoveFavorite(song);
+        }
     }
 }

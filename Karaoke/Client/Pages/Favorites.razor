@@ -1,0 +1,32 @@
+﻿@page "/favorites"
+@inject Karaoke.Client.Local.FavoriteService FavoriteService
+@using Karaoke.Shared
+
+<h1>Favoritos</h1>
+
+@if (favorites == null)
+{
+    <p><em>Cargando repertorio...</em></p>
+}
+else
+{
+    <p>Total: @favorites.Count()</p>
+    <Table Songs="favorites" OnFavorite="OnFavorite"></Table>
+}
+
+@code {
+    private List<Song> favorites;
+
+    protected override async Task OnInitializedAsync()
+    {
+        favorites = await FavoriteService.GetFavorites();
+    }
+
+    private async void OnFavorite(Song song)
+    {
+        await FavoriteService.RemoveFavorite(song);
+        favorites = await FavoriteService.GetFavorites();
+        this.StateHasChanged();
+    }
+
+}

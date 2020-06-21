@@ -6,7 +6,10 @@ namespace Karaoke.Shared
     {
         [JsonProperty("interprete")]
         public string Artist { get; set; }
+
         [JsonProperty("cancion")]
         public string Name { get; set; }
+
+        public bool Favorite { get; set; }
     }
 }
