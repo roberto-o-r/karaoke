@@ -1,0 +1,33 @@
+@using Krk.Models
+
+<div>
+    <table class="table" style="table-layout:fixed;">
+        <thead>
+            <tr>
+                <th>Intérprete</th>
+                <th>Canción</th>
+                <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var song in Songs)
+            {
+                <tr>
+                    <td>@song.Artist</td>
+                    <td>@song.Name</td>
+                    <td style="width:24px; padding-left:0px; padding-right:0px;">
+                        <i class="fav material-icons md-18" @onclick="@(() => OnFavorite.InvokeAsync(song))">@(song.Favorite? "favorite": "favorite_border")</i>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<Song> Songs { get; set; }
+
+    [Parameter]
+    public EventCallback<Song> OnFavorite { get; set; }
+}
