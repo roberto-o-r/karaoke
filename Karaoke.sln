@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Karaoke.Client", "Karaoke\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Karaoke.Shared", "Karaoke\Shared\Karaoke.Shared.csproj", "{1BB331BB-D3E1-4F4B-93EB-2FBDE6BDB11C}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Krk", "Krk/Krk.csproj", "{D3B7254E-338F-4D7B-9C68-C0CF8BAFE676}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{1BB331BB-D3E1-4F4B-93EB-2FBDE6BDB11C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1BB331BB-D3E1-4F4B-93EB-2FBDE6BDB11C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1BB331BB-D3E1-4F4B-93EB-2FBDE6BDB11C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3B7254E-338F-4D7B-9C68-C0CF8BAFE676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3B7254E-338F-4D7B-9C68-C0CF8BAFE676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3B7254E-338F-4D7B-9C68-C0CF8BAFE676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3B7254E-338F-4D7B-9C68-C0CF8BAFE676}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

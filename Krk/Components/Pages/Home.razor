@@ -1,9 +1,43 @@
 ﻿@page "/"
+@using Krk.Models
+@using Krk.Services
+@inject SongService SongService
 
 <PageTitle>Karaoke</PageTitle>
 
-<h1>Hello, mundo!</h1>
+<h1>Karaoke entre Amigos</h1>
 
-Welcome to your new app.
+@if (songs == null)
+{
+    <p><em>Cargando repertorio...</em></p>
+}
+else
+{
+    <p>Total: @songs.Count()</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Intérprete</th>
+                <th>Canción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var song in songs)
+            {
+                <tr>
+                    <td>@song.Artist</td>
+                    <td>@song.Name</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
 
-<Counter />
+@code {
+    private List<Song>? songs;
+
+    protected override void OnInitialized()
+    {
+        songs = SongService.SearchSongs();
+    }
+}

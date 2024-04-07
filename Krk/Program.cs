@@ -1,10 +1,13 @@
 using Krk.Components;
+using Krk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddSingleton<SongService>();
 
 var app = builder.Build();
 
