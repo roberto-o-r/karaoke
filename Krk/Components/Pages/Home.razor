@@ -1,7 +1,6 @@
 ﻿@page "/"
 @using Krk.Models
 @using Krk.Services
-@using Krk.Components.Shared
 @inject SongService SongService
 
 <PageTitle>Karaoke</PageTitle>
@@ -15,32 +14,19 @@
 else
 {
     <p>Total: @songs.Count()</p>
-    <Table Songs="songs" OnFavorite="OnFavorite"></Table>
-}
-
-@if (forecasts == null)
-{
-    <p><em>Loading...</em></p>
-}
-else
-{
     <table class="table">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Temp. (C)</th>
-                <th>Temp. (F)</th>
-                <th>Summary</th>
+                <th>Intérprete</th>
+                <th>Canción</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var forecast in forecasts)
+            @foreach (var song in songs)
             {
                 <tr>
-                    <td>@forecast.Date.ToShortDateString()</td>
-                    <td>@forecast.TemperatureC</td>
-                    <td>@forecast.TemperatureF</td>
-                    <td>@forecast.Summary</td>
+                    <td>@song.Artist</td>
+                    <td>@song.Name</td>
                 </tr>
             }
         </tbody>
@@ -48,36 +34,10 @@ else
 }
 
 @code {
-    private WeatherForecast[]? forecasts;
     private List<Song>? songs;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Simulate asynchronous loading to demonstrate streaming rendering
-        await Task.Delay(500);
-
-        var startDate = DateOnly.FromDateTime(DateTime.Now);
-        var summaries = new[] { "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching" };
-        forecasts = Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = startDate.AddDays(index),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = summaries[Random.Shared.Next(summaries.Length)]
-        }).ToArray();
-
         songs = SongService.SearchSongs();
-    }
-
-    private class WeatherForecast
-    {
-        public DateOnly Date { get; set; }
-        public int TemperatureC { get; set; }
-        public string? Summary { get; set; }
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
-
-    private async void OnFavorite(Song song)
-    {
-        
     }
 }
