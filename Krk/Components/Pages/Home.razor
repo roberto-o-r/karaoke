@@ -1,4 +1,5 @@
 ﻿@page "/"
+@rendermode InteractiveServer
 @using Krk.Models
 @using Krk.Services
 @inject SongService SongService
@@ -6,6 +7,16 @@
 <PageTitle>Karaoke</PageTitle>
 
 <h1>Karaoke entre Amigos</h1>
+
+<div class="form-group mb-3">
+    <label for="searchInput" class="mb-3">¿Cuál vas a cantar?</label>
+    <div class="input-group">
+        <input type="text" class="form-control" @bind="searchTerm">
+        <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+            @onclick="SearchSongs">Buscar</button>
+    </div>
+    <small id="help" class="form-text text-muted">Busca por artista o por canción.</small>
+</div>
 
 @if (songs == null)
 {
@@ -35,9 +46,15 @@ else
 
 @code {
     private List<Song>? songs;
+    private string searchTerm = "";
 
     protected override void OnInitialized()
     {
         songs = SongService.SearchSongs();
+    }
+
+    private void SearchSongs()
+    {
+        songs = SongService.SearchSongs(searchTerm);
     }
 }
