@@ -8,6 +8,11 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<SongService>();
+var connectionString = builder.Configuration["Cosmos:ConnectionString"];
+builder.Services.AddSingleton(new StorageService(
+    connectionString ?? throw new ArgumentNullException(nameof(connectionString)),
+    "Karaoke",
+    "SongsQueue"));
 
 var app = builder.Build();
 

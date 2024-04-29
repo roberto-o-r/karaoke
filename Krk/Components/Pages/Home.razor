@@ -1,15 +1,30 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Krk.Models
 @using Krk.Services
 @inject SongService SongService
+@inject StorageService StorageService
+@inject ProtectedLocalStorage ProtectedLocalStore
 
 <PageTitle>Karaoke</PageTitle>
 
 <h1>Karaoke entre Amigos</h1>
 
+@if (string.IsNullOrEmpty(userName))
+{
+    <div class="form-group mb-3">
+        <label class="mb-3">Primero ingresa tu nombre para agregar canciones a la cola</label>
+        <div class="input-group">
+            <input type="text" class="form-control" @bind="userNameInput">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                @onclick="SetUserName">Guardar</button>
+        </div>
+    </div>
+}
+
 <div class="form-group mb-3">
-    <label for="searchInput" class="mb-3">¿Cuál vas a cantar?</label>
+    <label for="searchInput" class="mb-3">¿Cuál vas a cantar@(userName != null ? $" {userName}" : "")?</label>
     <div class="input-group">
         <input type="text" class="form-control" @bind="searchTerm">
         <button class="btn btn-outline-secondary" type="button" id="button-addon2"
@@ -30,6 +45,7 @@ else
             <tr>
                 <th>Intérprete</th>
                 <th>Canción</th>
+                <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
             </tr>
         </thead>
         <tbody>
@@ -38,23 +54,65 @@ else
                 <tr>
                     <td>@song.Artist</td>
                     <td>@song.Name</td>
+                    <td>
+                        <i class="bi bi-plus-circle cursor-pointer" @onclick="() => AddSongToQueue(song)"></i>
+                    </td>
                 </tr>
             }
         </tbody>
     </table>
 }
 
+<div class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Modal title</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Modal body text goes here.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @code {
     private List<Song>? songs;
     private string searchTerm = "";
+    private string? userNameInput = "";
+    private string? userName = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         songs = SongService.SearchSongs();
+        var result = await ProtectedLocalStore.GetAsync<string>("userName");
+        if (result.Success)
+        {
+            userName = result.Value;
+        }
     }
 
     private void SearchSongs()
     {
         songs = SongService.SearchSongs(searchTerm);
+    }
+
+    private async Task SetUserName()
+    {
+        await ProtectedLocalStore.SetAsync("userName", userNameInput);
+        userName = userNameInput;
+    }
+
+    private async Task AddSongToQueue(Song song)
+    {
+        var item = new { id = Guid.NewGuid().ToString(), UserName = userName, Song = song, Order = DateTime.UtcNow.Ticks };
+        await StorageService.AddItemAsync(item);
     }
 }
