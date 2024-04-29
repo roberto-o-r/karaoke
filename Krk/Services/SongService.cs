@@ -1,4 +1,5 @@
 ﻿using Krk.Models;
+using Krk.Repositories;
 using System.Text;
 using System.Text.Json;
 
@@ -7,11 +8,13 @@ namespace Krk.Services;
 public class SongService
 {
     private readonly IWebHostEnvironment env;
+    private readonly QueueRepository songsRepository;
     private List<Song>? songs;
 
-    public SongService(IWebHostEnvironment env)
+    public SongService(IWebHostEnvironment env, QueueRepository songsRepository)
     {
         this.env = env;
+        this.songsRepository = songsRepository;
         LoadSongs();
     }
 
@@ -60,5 +63,17 @@ public class SongService
         {
             return false;
         }
+    }
+
+    public async Task AddSongToQueue(string userName, Song song)
+    {
+        var item = new { id = Guid.NewGuid().ToString(), UserName = userName, Song = song, Order = DateTime.UtcNow.Ticks };
+        await songsRepository.AddItemAsync(item);
+    }
+
+    public async Task<List<Song>> GetUserQueue(string userName)
+    {
+        var queue =  await songsRepository.GetItemsAsync<QueueItem>($"SELECT * FROM c");
+        return queue.Select(x => x.Song).ToList();
     }
 }
