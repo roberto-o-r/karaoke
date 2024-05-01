@@ -10,7 +10,7 @@
 
 @if (users != null)
 {
-    <label class="mb-3">Selecciona el usuario para mostrar su cola.</label>
+    <label class="mb-3">Selecciona el usuario para mostrar su lista de canciones.</label>
     <ul class="list-group">
         @foreach (var user in users)
         {
@@ -21,7 +21,7 @@
 
 @if (!string.IsNullOrEmpty(selectedUser))
 {
-    <h2 class="mt-3">Cola de @selectedUser</h2>
+    <h2 class="mt-3">Lista de @selectedUser</h2>
     <table class="table">
         <thead>
             <tr>
@@ -41,7 +41,7 @@
             }
         </tbody>
     </table>
-    <button class="btn btn-primary" @onclick="() => ClearQueue()">Limpiar cola</button>
+    <button class="btn btn-primary" @onclick="() => ClearQueue()">Limpiar lista</button>
 }
 
 @code {
