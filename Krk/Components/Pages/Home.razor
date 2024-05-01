@@ -65,11 +65,11 @@ else
                             <td>
                                 @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
                                 {
-                                    <i class="bi bi-dash-circle-fill cursor-pointer" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                    <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveSongFromQueue(song)"></i>
                                 }
                                 else
                                 {
-                                    <i class="bi bi-plus-circle cursor-pointer" @onclick="() => AddSongToQueue(song)"></i>
+                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4" @onclick="() => AddSongToQueue(song)"></i>
                                 }
                             </td>
                         }
