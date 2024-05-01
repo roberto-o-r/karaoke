@@ -47,33 +47,19 @@ public class SongService
         return filteredSongs;
     }
 
-    public bool UpdateSongs(string data)
-    {
-        try
-        {
-            var songsData = JsonSerializer.Serialize(data);
-            using (StreamWriter file = File.CreateText(env.ContentRootPath + "/data/canciones.json"))
-            {
-                file.Write(songsData);
-            }
-            LoadSongs();
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
-    }
-
     public async Task AddSongToQueue(string userName, Song song)
     {
-        var item = new { id = Guid.NewGuid().ToString(), UserName = userName, Song = song, Order = DateTime.UtcNow.Ticks };
-        await songsRepository.AddItemAsync(item);
+        var item = new QueueItem() { Id = Guid.NewGuid().ToString(), UserName = userName, Song = song, Order = DateTime.UtcNow.Ticks };
+        await songsRepository.AddSongToQueue(item);
     }
 
-    public async Task<List<Song>> GetUserQueue(string userName)
+    public async Task RemoveSongFromQueue(string id)
     {
-        var queue =  await songsRepository.GetItemsAsync<QueueItem>($"SELECT * FROM c");
-        return queue.Select(x => x.Song).ToList();
+        await songsRepository.DeleteSongFromQueue(id);
+    }
+
+    public async Task<List<QueueItem>> GetUserQueue(string userName)
+    {
+        return await songsRepository.GetUserQueue(userName);
     }
 }

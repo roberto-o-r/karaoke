@@ -12,8 +12,7 @@ builder.Services.AddSingleton<SongService>();
 var connectionString = builder.Configuration["Cosmos:ConnectionString"];
 builder.Services.AddSingleton(new QueueRepository(
     connectionString ?? throw new ArgumentNullException(nameof(connectionString)),
-    "Karaoke",
-    "SongsQueue"));
+    "Karaoke"));
 
 var app = builder.Build();
 
