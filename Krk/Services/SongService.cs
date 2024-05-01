@@ -41,7 +41,7 @@ public class SongService
 
         if (filteredSongs != null && !string.IsNullOrEmpty(searchText))
         {
-            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText) || s.Name.ToLower().Contains(searchText)).ToList();
+            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText.ToLower()) || s.Name.ToLower().Contains(searchText.ToLower())).ToList();
         }
 
         return filteredSongs;
