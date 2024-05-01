@@ -11,21 +11,26 @@
 
 <h1>Karaoke entre Amigos</h1>
 
-@if (string.IsNullOrEmpty(userName))
+@if (isLoading)
+{
+    <p><em>Cargando...</em></p>
+    return;
+}
+
+@if (string.IsNullOrEmpty(user))
 {
     <div class="form-group mb-3">
-        <label class="mb-3">¡Hola! Ingresa tu nombre para comenzar</label>
+        <label class="mb-3">¡Hola! Ingresa tu nombre de usuario para comenzar</label>
         <div class="input-group">
-            <input type="text" class="form-control" @bind="userNameInput">
-            <button class="btn btn-outline-secondary" type="button" id="button-addon2"
-                @onclick="SaveUserName">Guardar</button>
+            <input type="text" class="form-control" @bind="userInput">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2" @onclick="SaveUser">Guardar</button>
         </div>
     </div>
 }
 else
 {
     <div class="form-group mb-3">
-        <label for="searchInput" class="mb-3">¿Cuál vas a cantar@(userName != null ? $" {userName}" : "")?</label>
+        <label for="searchInput" class="mb-3">¿Cuál vas a cantar@(user != null ? $" {user}" : "")?</label>
         <div class="input-group">
             <input type="text" class="form-control" @bind="searchTermInput">
             <button class="btn btn-outline-secondary" type="button" id="button-addon2"
@@ -55,7 +60,7 @@ else
                     <tr>
                         <td>@song.Artist</td>
                         <td>@song.Name</td>
-                        @if (!string.IsNullOrEmpty(userName))
+                        @if (!string.IsNullOrEmpty(user))
                         {
                             <td>
                                 @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
@@ -76,70 +81,68 @@ else
 }
 
 @code {
+    private bool isLoading = true;
     private List<Song>? songs;
-    private List<QueueItem>? queue;
-    private string? userName = "";
+    private List<QueueItem> queue = new List<QueueItem>();
+    private string? user = "";
     private string searchTermInput = "";
-    private string? userNameInput = "";
+    private string? userInput = "";
 
     protected override async Task OnInitializedAsync()
     {
-        var userNameStore = await ProtectedLocalStore.GetAsync<string>("userName");
-        if (userNameStore.Success)
+        isLoading = true;
+        var userStore = await ProtectedLocalStore.GetAsync<string>("User");
+        if (userStore.Success)
         {
-            userName = userNameStore.Value;
+            user = userStore.Value;
         }
-        await InitializePage();
+        await SearchSongs();
+        isLoading = false;
     }
 
-    private async Task InitializePage()
+    private async Task SearchSongs()
     {
-        SearchSongs();
+        songs = SongService.SearchSongs(searchTermInput);
         await GetUserQueue();
     }
 
-    private void SearchSongs()
+    private async Task SaveUser()
     {
-        songs = SongService.SearchSongs(searchTermInput);
-    }
-
-    private async Task SaveUserName()
-    {
-        if (!string.IsNullOrEmpty(userNameInput))
+        if (!string.IsNullOrEmpty(userInput))
         {
-            await ProtectedLocalStore.SetAsync("userName", userNameInput);
-            userName = userNameInput;
-            await InitializePage();
+            await ProtectedLocalStore.SetAsync("User", userInput);
+            user = userInput;
+            await SearchSongs();
         }
     }
 
     private async Task AddSongToQueue(Song song)
     {
-        if (!string.IsNullOrEmpty(userName))
+        if (!string.IsNullOrEmpty(user))
         {
-            await SongService.AddSongToQueue(userName, song);
-            await InitializePage();
+            await SongService.AddSongToQueue(user, song);
+            await SearchSongs();
         }
     }
 
     private async Task RemoveSongFromQueue(Song song)
     {
-        if (!string.IsNullOrEmpty(userName))
+        if (!string.IsNullOrEmpty(user))
         {
-            var queueItem = queue?.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
+            var queueItem = queue.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
             if (queueItem != null)
             {
                 await SongService.RemoveSongFromQueue(queueItem.Id);
-            await InitializePage();
+                await SearchSongs();
             }
         }
     }
 
     private async Task GetUserQueue()
     {
-        if (!string.IsNullOrEmpty(userName))
+        if (!string.IsNullOrEmpty(user))
         {
-            queue = await SongService.GetUserQueue(userName);
+            queue = await SongService.GetUserQueue(user);
         }
     }
 }

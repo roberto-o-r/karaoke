@@ -47,9 +47,9 @@ public class SongService
         return filteredSongs;
     }
 
-    public async Task AddSongToQueue(string userName, Song song)
+    public async Task AddSongToQueue(string user, Song song)
     {
-        var item = new QueueItem() { Id = Guid.NewGuid().ToString(), UserName = userName, Song = song, Order = DateTime.UtcNow.Ticks };
+        var item = new QueueItem() { Id = Guid.NewGuid().ToString(), User = user, Song = song, Order = DateTime.UtcNow.Ticks };
         await songsRepository.AddSongToQueue(item);
     }
 
@@ -58,8 +58,18 @@ public class SongService
         await songsRepository.DeleteSongFromQueue(id);
     }
 
-    public async Task<List<QueueItem>> GetUserQueue(string userName)
+    public async Task<List<QueueItem>> GetUserQueue(string user)
     {
-        return await songsRepository.GetUserQueue(userName);
+        return await songsRepository.GetUserQueue(user);
+    }
+
+    public async Task<List<QueueItem>> GetQueue()
+    {
+        return await songsRepository.GetQueue();
+    }
+
+    public Task ClearQueue(string user)
+    {
+        return songsRepository.ClearQueue(user);
     }
 }

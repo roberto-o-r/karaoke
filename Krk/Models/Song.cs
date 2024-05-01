@@ -10,5 +10,6 @@ public class Song
     [JsonPropertyName("cancion")]
     public required string Name { get; set; }
 
+    [JsonPropertyName("favorite")]
     public bool Favorite { get; set; }
 }
