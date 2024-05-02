@@ -1,0 +1,78 @@
+@page "/queue"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using Krk.Models
+@using Krk.Services
+@inject SongService SongService
+@inject ProtectedLocalStorage ProtectedLocalStore
+
+<PageTitle>Lista de Canciones</PageTitle>
+
+<h1>Lista de Canciones por Cantar</h1>
+
+@if (isLoading)
+{
+    <p><em>Cargando...</em></p>
+    return;
+}
+
+<p>Total: @queue.Count()</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Intérprete</th>
+            <th>Canción</th>
+            <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in queue)
+        {
+            <tr>
+                <td>@item.Song.Artist</td>
+                <td>@item.Song.Name</td>
+                @if (!string.IsNullOrEmpty(user))
+                {
+                    <td>
+                        <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveItemFromQueue(item)"></i>
+                    </td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private bool isLoading = true;
+    private List<QueueItem> queue = new List<QueueItem>();
+    private string? user = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var userStore = await ProtectedLocalStore.GetAsync<string>("User");
+        if (userStore.Success)
+        {
+            user = userStore.Value;
+        }
+        await GetUserQueue();
+        isLoading = false;
+    }
+
+    private async Task GetUserQueue()
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            queue = await SongService.GetUserQueue(user);
+        }
+    }
+
+    private async Task RemoveItemFromQueue(QueueItem item)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            await SongService.RemoveSongFromQueue(item.Id);
+            queue.Remove(item);
+        }
+    }
+}

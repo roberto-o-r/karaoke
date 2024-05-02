@@ -1,4 +1,5 @@
 ﻿using Krk.Models;
+using Krk.Repositories;
 using System.Text;
 using System.Text.Json;
 
@@ -7,11 +8,13 @@ namespace Krk.Services;
 public class SongService
 {
     private readonly IWebHostEnvironment env;
+    private readonly QueueRepository songsRepository;
     private List<Song>? songs;
 
-    public SongService(IWebHostEnvironment env)
+    public SongService(IWebHostEnvironment env, QueueRepository songsRepository)
     {
         this.env = env;
+        this.songsRepository = songsRepository;
         LoadSongs();
     }
 
@@ -38,27 +41,35 @@ public class SongService
 
         if (filteredSongs != null && !string.IsNullOrEmpty(searchText))
         {
-            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText) || s.Name.ToLower().Contains(searchText)).ToList();
+            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText.ToLower()) || s.Name.ToLower().Contains(searchText.ToLower())).ToList();
         }
 
         return filteredSongs;
     }
 
-    public bool UpdateSongs(string data)
+    public async Task AddSongToQueue(string user, Song song)
     {
-        try
-        {
-            var songsData = JsonSerializer.Serialize(data);
-            using (StreamWriter file = File.CreateText(env.ContentRootPath + "/data/canciones.json"))
-            {
-                file.Write(songsData);
-            }
-            LoadSongs();
-            return true;
-        }
-        catch (Exception)
-        {
-            return false;
-        }
+        var item = new QueueItem() { Id = Guid.NewGuid().ToString(), User = user, Song = song, Order = DateTime.UtcNow.Ticks };
+        await songsRepository.AddSongToQueue(item);
+    }
+
+    public async Task RemoveSongFromQueue(string id)
+    {
+        await songsRepository.DeleteSongFromQueue(id);
+    }
+
+    public async Task<List<QueueItem>> GetUserQueue(string user)
+    {
+        return await songsRepository.GetUserQueue(user);
+    }
+
+    public async Task<List<QueueItem>> GetQueue()
+    {
+        return await songsRepository.GetQueue();
+    }
+
+    public Task ClearQueue(string user)
+    {
+        return songsRepository.ClearQueue(user);
     }
 }

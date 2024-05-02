@@ -1,60 +1,148 @@
 ﻿@page "/"
 @rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Krk.Models
 @using Krk.Services
+@using Newtonsoft.Json
 @inject SongService SongService
+@inject ProtectedLocalStorage ProtectedLocalStore
 
 <PageTitle>Karaoke</PageTitle>
 
 <h1>Karaoke entre Amigos</h1>
 
-<div class="form-group mb-3">
-    <label for="searchInput" class="mb-3">¿Cuál vas a cantar?</label>
-    <div class="input-group">
-        <input type="text" class="form-control" @bind="searchTerm">
-        <button class="btn btn-outline-secondary" type="button" id="button-addon2"
-            @onclick="SearchSongs">Buscar</button>
-    </div>
-    <small id="help" class="form-text text-muted">Busca por artista o por canción.</small>
-</div>
-
-@if (songs == null)
+@if (isLoading)
 {
-    <p><em>Cargando repertorio...</em></p>
+    <p><em>Cargando...</em></p>
+    return;
+}
+
+@if (string.IsNullOrEmpty(user))
+{
+    <div class="form-group mb-3">
+        <label class="mb-3">¡Hola! Ingresa tu nombre de usuario para comenzar</label>
+        <div class="input-group">
+            <input type="text" class="form-control" @bind="userInput">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2" @onclick="SaveUser">Guardar</button>
+        </div>
+    </div>
 }
 else
 {
-    <p>Total: @songs.Count()</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Intérprete</th>
-                <th>Canción</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var song in songs)
-            {
+    <div class="form-group mb-3">
+        <label for="searchInput" class="mb-3">¿Cuál vas a cantar@(user != null ? $" {user}" : "")?</label>
+        <div class="input-group">
+            <input type="text" class="form-control" @bind="searchTermInput">
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2"
+                @onclick="SearchSongs">Buscar</button>
+        </div>
+        <small id="help" class="form-text text-muted">Busca por artista o por canción.</small>
+    </div>
+
+    @if (songs == null)
+    {
+        <p><em>Cargando repertorio...</em></p>
+    }
+    else
+    {
+        <p>Total: @songs.Count()</p>
+        <table class="table">
+            <thead>
                 <tr>
-                    <td>@song.Artist</td>
-                    <td>@song.Name</td>
+                    <th>Intérprete</th>
+                    <th>Canción</th>
+                    <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var song in songs)
+                {
+                    <tr>
+                        <td>@song.Artist</td>
+                        <td>@song.Name</td>
+                        @if (!string.IsNullOrEmpty(user))
+                        {
+                            <td>
+                                @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                {
+                                    <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4" @onclick="() => AddSongToQueue(song)"></i>
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
+    private bool isLoading = true;
     private List<Song>? songs;
-    private string searchTerm = "";
+    private List<QueueItem> queue = new List<QueueItem>();
+    private string? user = "";
+    private string searchTermInput = "";
+    private string? userInput = "";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        songs = SongService.SearchSongs();
+        isLoading = true;
+        var userStore = await ProtectedLocalStore.GetAsync<string>("User");
+        if (userStore.Success)
+        {
+            user = userStore.Value;
+        }
+        await SearchSongs();
+        isLoading = false;
     }
 
-    private void SearchSongs()
+    private async Task SearchSongs()
     {
-        songs = SongService.SearchSongs(searchTerm);
+        songs = SongService.SearchSongs(searchTermInput);
+        await GetUserQueue();
+    }
+
+    private async Task SaveUser()
+    {
+        if (!string.IsNullOrEmpty(userInput))
+        {
+            await ProtectedLocalStore.SetAsync("User", userInput);
+            user = userInput;
+            await SearchSongs();
+        }
+    }
+
+    private async Task AddSongToQueue(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            await SongService.AddSongToQueue(user, song);
+            await SearchSongs();
+        }
+    }
+
+    private async Task RemoveSongFromQueue(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            var queueItem = queue.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
+            if (queueItem != null)
+            {
+                await SongService.RemoveSongFromQueue(queueItem.Id);
+                await SearchSongs();
+            }
+        }
+    }
+
+    private async Task GetUserQueue()
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            queue = await SongService.GetUserQueue(user);
+        }
     }
 }

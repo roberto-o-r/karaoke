@@ -1,4 +1,5 @@
 using Krk.Components;
+using Krk.Repositories;
 using Krk.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -8,6 +9,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<SongService>();
+var connectionString = builder.Configuration["Cosmos:ConnectionString"];
+builder.Services.AddSingleton(new QueueRepository(
+    connectionString ?? throw new ArgumentNullException(nameof(connectionString)),
+    "Karaoke"));
 
 var app = builder.Build();
 

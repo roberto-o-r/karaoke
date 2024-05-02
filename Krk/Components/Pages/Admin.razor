@@ -1,0 +1,87 @@
+@page "/admin"
+@using Krk.Models
+@using Krk.Services
+@rendermode InteractiveServer
+@inject SongService SongService
+
+<PageTitle>Admin</PageTitle>
+
+<h1>Admin</h1>
+
+@if (users != null)
+{
+    <label class="mb-3">Selecciona el usuario para mostrar su lista de canciones.</label>
+    <ul class="list-group">
+        @foreach (var user in users)
+        {
+            <li class="list-group-item @(user == selectedUser ? "active" : "")" @onclick="() => SelectUser(user)">@user</li>
+        }
+    </ul>
+}
+
+@if (!string.IsNullOrEmpty(selectedUser))
+{
+    <h2 class="mt-3">Lista de @selectedUser</h2>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Intérprete</th>
+                <th>Canción</th>
+                <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in queue.Where(q => q.User == selectedUser))
+            {
+                <tr>
+                    <td>@item.Song.Artist</td>
+                    <td>@item.Song.Name</td>
+                    <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveItemFromQueue(item)"></i>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <button class="btn btn-primary" @onclick="() => ClearQueue()">Limpiar lista</button>
+}
+
+@code {
+    private List<string> users = new List<string>();
+    private string? selectedUser;
+    private List<QueueItem> queue = new List<QueueItem>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        queue = await SongService.GetQueue();
+        users = queue.Select(q => q.User).Distinct().ToList();
+    }
+
+    private async Task RefreshQueues()
+    {
+        queue = await SongService.GetQueue();
+        users = queue.Select(q => q.User).Distinct().ToList();
+    }
+
+    private async Task SelectUser(string user)
+    {
+        await RefreshQueues();
+        selectedUser = user;
+    }
+
+    private async Task ClearQueue()
+    {
+        if (!string.IsNullOrEmpty(selectedUser))
+        {
+            await SongService.ClearQueue(selectedUser);
+            queue.RemoveAll(q => q.User == selectedUser);
+        }
+    }
+
+    private async Task RemoveItemFromQueue(QueueItem item)
+    {
+        if (!string.IsNullOrEmpty(selectedUser))
+        {
+            await SongService.RemoveSongFromQueue(item.Id);
+            queue.Remove(item);
+        }
+    }
+}
