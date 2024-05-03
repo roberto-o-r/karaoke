@@ -9,10 +9,16 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSingleton<SongService>();
+builder.Services.AddSingleton<FavoritesService>();
+
 var connectionString = builder.Configuration["Cosmos:ConnectionString"];
-builder.Services.AddSingleton(new QueueRepository(
-    connectionString ?? throw new ArgumentNullException(nameof(connectionString)),
-    "Karaoke"));
+if (connectionString == null)
+{
+    throw new ArgumentNullException("Cosmos:ConnectionString");
+}
+
+builder.Services.AddSingleton(new QueueRepository(connectionString, "Karaoke"));
+builder.Services.AddSingleton(new FavoritesRepository(connectionString, "Karaoke"));
 
 var app = builder.Build();
 

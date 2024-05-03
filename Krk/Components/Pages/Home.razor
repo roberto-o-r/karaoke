@@ -5,6 +5,7 @@
 @using Krk.Services
 @using Newtonsoft.Json
 @inject SongService SongService
+@inject FavoritesService FavoritesService
 @inject ProtectedLocalStorage ProtectedLocalStore
 
 <PageTitle>Karaoke</PageTitle>
@@ -46,30 +47,39 @@ else
     else
     {
         <p>Total: @songs.Count()</p>
+        <div>
         <table class="table">
             <thead>
                 <tr>
                     <th>Intérprete</th>
                     <th>Canción</th>
-                    <th style="width:24px; padding-left:0px; padding-right:0px;"></th>
+                    <th style="width: 24px; padding-left:0px; padding-right:0px;"></th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var song in songs)
                 {
                     <tr>
-                        <td>@song.Artist</td>
-                        <td>@song.Name</td>
+                        <td class="text-break">@song.Artist</td>
+                        <td class="text-break">@song.Name</td>
                         @if (!string.IsNullOrEmpty(user))
                         {
                             <td>
                                 @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
                                 {
-                                    <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                    <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromQueue(song)"></i>
                                 }
                                 else
                                 {
-                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4" @onclick="() => AddSongToQueue(song)"></i>
+                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToQueue(song)"></i>
+                                }
+                                @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                {
+                                    <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
                                 }
                             </td>
                         }
@@ -77,6 +87,7 @@ else
                 }
             </tbody>
         </table>
+        </div>
     }
 }
 
@@ -84,6 +95,7 @@ else
     private bool isLoading = true;
     private List<Song>? songs;
     private List<QueueItem> queue = new List<QueueItem>();
+    private List<Favorite> favorites = new List<Favorite>();
     private string? user = "";
     private string searchTermInput = "";
     private string? userInput = "";
@@ -104,6 +116,7 @@ else
     {
         songs = SongService.SearchSongs(searchTermInput);
         await GetUserQueue();
+        await GetFavorites();
     }
 
     private async Task SaveUser()
@@ -143,6 +156,36 @@ else
         if (!string.IsNullOrEmpty(user))
         {
             queue = await SongService.GetUserQueue(user);
+        }
+    }
+
+    private async Task AddSongToFavorites(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            await FavoritesService.AddSongToFavorites(user, song);
+            await SearchSongs();
+        }
+    }
+
+    private async Task RemoveSongFromFavorites(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            var favorite = favorites.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
+            if (favorite != null)
+            {
+                await FavoritesService.RemoveSongFromFavorites(favorite.Id);
+                await SearchSongs();
+            }
+        }
+    }
+
+    private async Task GetFavorites()
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            favorites = await FavoritesService.GetUserFavorites(user);
         }
     }
 }
