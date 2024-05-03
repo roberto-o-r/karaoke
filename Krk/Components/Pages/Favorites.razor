@@ -1,14 +1,14 @@
-@page "/queue"
+@page "/favorites"
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Krk.Models
 @using Krk.Services
-@inject SongService SongService
+@inject FavoritesService FavoritesService
 @inject ProtectedLocalStorage ProtectedLocalStore
 
-<PageTitle>Karaoke | Lista</PageTitle>
+<PageTitle>Karaoke | Favoritas</PageTitle>
 
-<h1>Lista de Canciones por Cantar</h1>
+<h1>Mis Canciones Favoritas</h1>
 
 @if (isLoading)
 {
@@ -16,7 +16,7 @@
     return;
 }
 
-<p>Total: @queue.Count()</p>
+<p>Total: @favorites.Count()</p>
 <table class="table">
     <thead>
         <tr>
@@ -26,15 +26,15 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in queue)
+        @foreach (var favorite in favorites)
         {
             <tr>
-                <td>@item.Song.Artist</td>
-                <td>@item.Song.Name</td>
+                <td>@favorite.Song.Artist</td>
+                <td>@favorite.Song.Name</td>
                 @if (!string.IsNullOrEmpty(user))
                 {
                     <td>
-                        <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveItemFromQueue(item)"></i>
+                        <i class="bi bi-dash-circle-fill cursor-pointer h4" @onclick="() => RemoveItemFromFavorites(favorite)"></i>
                     </td>
                 }
             </tr>
@@ -44,7 +44,7 @@
 
 @code {
     private bool isLoading = true;
-    private List<QueueItem> queue = new List<QueueItem>();
+    private List<Favorite> favorites = new List<Favorite>();
     private string? user = "";
 
     protected override async Task OnInitializedAsync()
@@ -55,24 +55,24 @@
         {
             user = userStore.Value;
         }
-        await GetUserQueue();
+        await GetUserFavorites();
         isLoading = false;
     }
 
-    private async Task GetUserQueue()
+    private async Task GetUserFavorites()
     {
         if (!string.IsNullOrEmpty(user))
         {
-            queue = await SongService.GetUserQueue(user);
+            favorites = await FavoritesService.GetUserFavorites(user);
         }
     }
 
-    private async Task RemoveItemFromQueue(QueueItem item)
+    private async Task RemoveItemFromFavorites(Favorite favorite)
     {
         if (!string.IsNullOrEmpty(user))
         {
-            await SongService.RemoveSongFromQueue(item.Id);
-            queue.Remove(item);
+            await FavoritesService.RemoveSongFromFavorites(favorite.Id);
+            favorites.Remove(favorite);
         }
     }
 }
