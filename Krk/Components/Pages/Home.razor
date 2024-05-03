@@ -47,6 +47,7 @@ else
     else
     {
         <p>Total: @songs.Count()</p>
+        <div>
         <table class="table">
             <thead>
                 <tr>
@@ -59,35 +60,34 @@ else
                 @foreach (var song in songs)
                 {
                     <tr>
-                        <td>@song.Artist</td>
-                        <td>@song.Name</td>
+                        <td class="text-break">@song.Artist</td>
+                        <td class="text-break">@song.Name</td>
                         @if (!string.IsNullOrEmpty(user))
                         {
                             <td>
-                                <div class="d-flex flex-column">
-                                    @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                    {
-                                        <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-2" @onclick="() => RemoveSongFromQueue(song)"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-2" @onclick="() => AddSongToQueue(song)"></i>
-                                    }
-                                    @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                    {
-                                        <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
-                                    }
-                                </div>
+                                @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                {
+                                    <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToQueue(song)"></i>
+                                }
+                                @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                {
+                                    <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
+                                }
+                                else
+                                {
+                                    <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
+                                }
                             </td>
                         }
                     </tr>
                 }
             </tbody>
         </table>
+        </div>
     }
 }
 
