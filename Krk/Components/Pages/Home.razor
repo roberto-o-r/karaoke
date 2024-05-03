@@ -52,7 +52,7 @@ else
                 <tr>
                     <th>Intérprete</th>
                     <th>Canción</th>
-                    <th style="width: 100px; padding-left:0px; padding-right:0px;"></th>
+                    <th style="width: 24px; padding-left:0px; padding-right:0px;"></th>
                 </tr>
             </thead>
             <tbody>
@@ -64,22 +64,24 @@ else
                         @if (!string.IsNullOrEmpty(user))
                         {
                             <td>
-                                @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                {
-                                    <i class="bi bi-dash-circle-fill cursor-pointer h4 me-3" @onclick="() => RemoveSongFromQueue(song)"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4 me-3" @onclick="() => AddSongToQueue(song)"></i>
-                                }
-                                @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                {
-                                    <i class="bi bi-heart-fill cursor-pointer h4" @onclick="() => RemoveSongFromFavorites(song)"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-heart cursor-pointer bi-2x h4" @onclick="() => AddSongToFavorites(song)"></i>
-                                }
+                                <div class="d-flex flex-column">
+                                    @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                    {
+                                        <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-2" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-2" @onclick="() => AddSongToQueue(song)"></i>
+                                    }
+                                    @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                    {
+                                        <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
+                                    }
+                                </div>
                             </td>
                         }
                     </tr>
@@ -170,7 +172,7 @@ else
     {
         if (!string.IsNullOrEmpty(user))
         {
-            var favorite = queue.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
+            var favorite = favorites.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
             if (favorite != null)
             {
                 await FavoritesService.RemoveSongFromFavorites(favorite.Id);
