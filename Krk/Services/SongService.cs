@@ -1,5 +1,6 @@
 ﻿using Krk.Models;
 using Krk.Repositories;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -38,10 +39,12 @@ public class SongService
     public List<Song>? SearchSongs(string? searchText = null)
     {
         var filteredSongs = songs;
-
         if (filteredSongs != null && !string.IsNullOrEmpty(searchText))
         {
-            filteredSongs = filteredSongs.Where(s => s.Artist.ToLower().Contains(searchText.ToLower()) || s.Name.ToLower().Contains(searchText.ToLower())).ToList();
+            var compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+            filteredSongs = filteredSongs.Where(s =>
+                compareInfo.IndexOf(s.Artist.ToLower(), searchText.ToLower(), CompareOptions.IgnoreNonSpace) > -1 ||
+                compareInfo.IndexOf(s.Name.ToLower(), searchText.ToLower(), CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
 
         return filteredSongs;
