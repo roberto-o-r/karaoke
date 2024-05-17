@@ -36,7 +36,7 @@ public class SongService
         }
     }
 
-    public List<Song>? SearchSongs(string? searchText = null)
+    public List<Song>? SearchSongs(string? searchText = null, int pageNumber = 1)
     {
         var filteredSongs = songs;
         if (filteredSongs != null && !string.IsNullOrEmpty(searchText))
@@ -47,7 +47,12 @@ public class SongService
                 compareInfo.IndexOf(s.Name.ToLower(), searchText.ToLower(), CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
 
-        return filteredSongs;
+        return filteredSongs?.Skip((pageNumber - 1) * 500).Take(500).ToList();
+    }
+
+    public int GetTotalSongs()
+    {
+        return songs?.Count ?? 0;
     }
 
     public async Task AddSongToQueue(string user, Song song)

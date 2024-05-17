@@ -46,47 +46,56 @@ else
     }
     else
     {
-        <p>Total: @songs.Count()</p>
+        <p>Total: @total - Página: @pageNumber</p>
         <div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Intérprete</th>
-                    <th>Canción</th>
-                    <th style="width: 24px; padding-left:0px; padding-right:0px;"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var song in songs)
-                {
+            <table class="table">
+                <thead>
                     <tr>
-                        <td class="text-break">@song.Artist</td>
-                        <td class="text-break">@song.Name</td>
-                        @if (!string.IsNullOrEmpty(user))
-                        {
-                            <td>
-                                @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                {
-                                    <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromQueue(song)"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToQueue(song)"></i>
-                                }
-                                @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
-                                {
-                                    <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
-                                }
-                                else
-                                {
-                                    <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
-                                }
-                            </td>
-                        }
+                        <th>Intérprete</th>
+                        <th>Canción</th>
+                        <th style="width: 24px; padding-left:0px; padding-right:0px;"></th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var song in songs)
+                    {
+                        <tr>
+                            <td class="text-break">@song.Artist</td>
+                            <td class="text-break">@song.Name</td>
+                            @if (!string.IsNullOrEmpty(user))
+                            {
+                                <td>
+                                    @if (queue != null && queue.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                    {
+                                        <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromQueue(song)"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToQueue(song)"></i>
+                                    }
+                                    @if (favorites != null && favorites.Any(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name))
+                                    {
+                                        <i class="bi bi-heart-fill cursor-pointer h4 mb-0" @onclick="() => RemoveSongFromFavorites(song)"></i>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-heart cursor-pointer bi-2x h4 mb-0" @onclick="() => AddSongToFavorites(song)"></i>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center align-items-center m-3">
+            <button class="btn btn-outline-primary" type="button" @onclick="PreviousPage">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+            </button>
+            <span class="m-2">Total: @total - Página: @pageNumber</span>
+            <button class="btn btn-outline-primary" type="button" @onclick="NextPage">
+                <i class="bi bi-arrow-right-circle-fill"></i>
+            </button>
         </div>
     }
 }
@@ -99,6 +108,8 @@ else
     private string? user = "";
     private string searchTermInput = "";
     private string? userInput = "";
+    private int pageNumber = 1;
+    private int total = 0;
 
     protected override async Task OnInitializedAsync()
     {
@@ -114,7 +125,8 @@ else
 
     private async Task SearchSongs()
     {
-        songs = SongService.SearchSongs(searchTermInput);
+        songs = SongService.SearchSongs(searchTermInput, pageNumber);
+        total = SongService.GetTotalSongs();
         await GetUserQueue();
         await GetFavorites();
     }
@@ -186,6 +198,25 @@ else
         if (!string.IsNullOrEmpty(user))
         {
             favorites = await FavoritesService.GetUserFavorites(user);
+        }
+    }
+
+    private async Task PreviousPage()
+    {
+        if (pageNumber > 1)
+        {
+            pageNumber--;
+            await SearchSongs();
+        }
+    }
+
+    private async Task NextPage()
+    {
+        var isLastPage = songs?.Count < 500;
+        if(!isLastPage)
+        {
+            pageNumber++;
+            await SearchSongs();
         }
     }
 }
