@@ -46,7 +46,15 @@ else
     }
     else
     {
-        <p>Total: @total - Página: @pageNumber</p>
+        <div class="d-flex justify-content-center align-items-center m-3">
+            <button class="btn btn-outline-primary" type="button" @onclick="PreviousPage">
+                <i class="bi bi-arrow-left-circle-fill"></i>
+            </button>
+            <span class="m-2">Total: @total - Página: @pageNumber</span>
+            <button class="btn btn-outline-primary" type="button" @onclick="NextPage">
+                <i class="bi bi-arrow-right-circle-fill"></i>
+            </button>
+        </div>
         <div>
             <table class="table">
                 <thead>
