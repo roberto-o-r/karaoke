@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/0a8b7b11-1bc2-41c7-9065-f591cc7336c1/resourceGroups/KaraokeResourceGroup/providers/Microsoft.Web/sites/Karaoke",
+    "appService.deploySubpath": "Krk\\bin\\Release\\net8.0\\publish"
+}
