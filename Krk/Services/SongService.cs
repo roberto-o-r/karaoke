@@ -47,7 +47,7 @@ public class SongService
                 compareInfo.IndexOf(s.Name.ToLower(), searchText.ToLower(), CompareOptions.IgnoreNonSpace) > -1).ToList();
         }
 
-        return filteredSongs?.Skip((pageNumber - 1) * 500).Take(500).ToList();
+        return filteredSongs?.Skip((pageNumber - 1) * 100).Take(100).ToList();
     }
 
     public int GetTotalSongs()
