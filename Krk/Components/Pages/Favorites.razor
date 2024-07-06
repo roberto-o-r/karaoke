@@ -3,6 +3,8 @@
 @using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
 @using Krk.Models
 @using Krk.Services
+@using Newtonsoft.Json
+@inject SongService SongService
 @inject FavoritesService FavoritesService
 @inject ProtectedLocalStorage ProtectedLocalStore
 
@@ -35,6 +37,17 @@
                 {
                     <td>
                         <i class="bi bi-heart-fill cursor-pointer h4" @onclick="() => RemoveItemFromFavorites(favorite)"></i>
+                        @if (queue != null && queue.Any(x => x.Song.Artist == favorite.Song.Artist && x.Song.Name ==
+                       favorite.Song.Name))
+                        {
+                            <i class="bi bi-dash-circle-fill cursor-pointer h4 mb-0"
+                                @onclick="() => RemoveSongFromQueue(favorite.Song)"></i>
+                        }
+                        else
+                        {
+                            <i class="bi bi-plus-circle cursor-pointer bi-2x h4 mb-0"
+                                @onclick="() => AddSongToQueue(favorite.Song)"></i>
+                        }
                     </td>
                 }
             </tr>
@@ -45,6 +58,7 @@
 @code {
     private bool isLoading = true;
     private List<Favorite> favorites = new List<Favorite>();
+    private List<QueueItem> queue = new List<QueueItem>();
     private string? user = "";
 
     protected override async Task OnInitializedAsync()
@@ -56,6 +70,7 @@
             user = userStore.Value;
         }
         await GetUserFavorites();
+        await GetUserQueue();
         isLoading = false;
     }
 
@@ -73,6 +88,36 @@
         {
             await FavoritesService.RemoveSongFromFavorites(favorite.Id);
             favorites.Remove(favorite);
+        }
+    }
+
+    private async Task AddSongToQueue(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            await SongService.AddSongToQueue(user, song);
+            await GetUserQueue();
+        }
+    }
+
+    private async Task GetUserQueue()
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            queue = await SongService.GetUserQueue(user);
+        }
+    }
+
+    private async Task RemoveSongFromQueue(Song song)
+    {
+        if (!string.IsNullOrEmpty(user))
+        {
+            var queueItem = queue.FirstOrDefault(x => x.Song.Artist == song.Artist && x.Song.Name == song.Name);
+            if (queueItem != null)
+            {
+                await SongService.RemoveSongFromQueue(queueItem.Id);
+                await GetUserQueue();
+            }
         }
     }
 }
