@@ -22,7 +22,7 @@ public class FavoritesRepository
 
     public async Task<List<Favorite>> GetUserFavorites(string user)
     {
-        var query = _container.GetItemQueryIterator<Favorite>(new QueryDefinition($"SELECT * FROM c WHERE c.user = '{user}'"));
+        var query = _container.GetItemQueryIterator<Favorite>(new QueryDefinition($"SELECT * FROM c WHERE c.user = '{user}' ORDER BY c.song.Artist ASC"));
         List<Favorite> results = new List<Favorite>();
         while (query.HasMoreResults)
         {
